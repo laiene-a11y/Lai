@@ -1,0 +1,17 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "markitdown[docx,pdf]>=0.1.1",
+    "mcp[cli]==1.8.0",
+    "pydantic>=2.11.3",
+    "pytest>=8.3.5",
+]
+
+[tool.uv]
+# magika 0.6.3 caps onnxruntime<=1.20.1 on win32, which has no wheel for
+# Python 3.14. Pin to 0.6.2 so onnxruntime can resolve to a cp314 wheel.
+constraint-dependencies = ["magika<0.6.3"]
