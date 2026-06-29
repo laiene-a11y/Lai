@@ -1,6 +1,9 @@
 import os
 import pytest
-from tools.document import binary_document_to_markdown
+from tools.document import (
+    binary_document_to_markdown,
+    document_path_to_markdown,
+)
 
 
 class TestBinaryDocumentToMarkdown:
@@ -47,3 +50,48 @@ class TestBinaryDocumentToMarkdown:
         assert len(result) > 0
         # Check for typical markdown formatting - this will depend on your actual test file
         assert "#" in result or "-" in result or "*" in result
+
+
+class TestDocumentPathToMarkdown:
+    # Reuse the same fixtures as the binary conversion tests
+    FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
+    DOCX_FIXTURE = os.path.join(FIXTURES_DIR, "mcp_docs.docx")
+    PDF_FIXTURE = os.path.join(FIXTURES_DIR, "mcp_docs.pdf")
+
+    def test_document_path_to_markdown_with_docx(self):
+        """Test converting a DOCX file by path to markdown."""
+        result = document_path_to_markdown(self.DOCX_FIXTURE)
+
+        assert isinstance(result, str)
+        assert len(result) > 0
+        assert "#" in result or "-" in result or "*" in result
+
+    def test_document_path_to_markdown_with_pdf(self):
+        """Test converting a PDF file by path to markdown."""
+        result = document_path_to_markdown(self.PDF_FIXTURE)
+
+        assert isinstance(result, str)
+        assert len(result) > 0
+        assert "#" in result or "-" in result or "*" in result
+
+    def test_path_result_matches_binary(self):
+        """Path-based conversion should match reading the bytes directly."""
+        with open(self.PDF_FIXTURE, "rb") as f:
+            pdf_data = f.read()
+
+        assert document_path_to_markdown(self.PDF_FIXTURE) == (
+            binary_document_to_markdown(pdf_data, "pdf")
+        )
+
+    def test_missing_file_raises_file_not_found(self):
+        """A nonexistent path should raise FileNotFoundError."""
+        missing = os.path.join(self.FIXTURES_DIR, "does_not_exist.pdf")
+        with pytest.raises(FileNotFoundError):
+            document_path_to_markdown(missing)
+
+    def test_unsupported_extension_raises_value_error(self, tmp_path):
+        """An unsupported file type should raise ValueError."""
+        txt_file = tmp_path / "note.txt"
+        txt_file.write_text("hello")
+        with pytest.raises(ValueError):
+            document_path_to_markdown(str(txt_file))

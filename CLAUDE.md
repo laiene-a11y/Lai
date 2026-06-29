@@ -26,7 +26,7 @@ The server is assembled in a single place and tools are deliberately decoupled f
 - **`tools/`** — each tool is a plain Python function (e.g. `tools/document.py`, `tools/math.py`). Functions take typed args and return a value; they have no knowledge of MCP. This keeps them directly unit-testable without a running server.
 - **`tests/`** — pytest tests import tool functions directly and exercise them. Document tests read sample files from `tests/fixtures/` (`mcp_docs.docx`, `mcp_docs.pdf`) and assert on the converted output, so new document-conversion features generally need a matching fixture.
 
-Note: `tools/document.py` (`binary_document_to_markdown`, built on `markitdown`) exists and is tested, but is **not yet registered** in `main.py` (only `add` from `tools/math.py` is). Register it there to expose it.
+Document conversion in `tools/document.py` is layered: `binary_document_to_markdown` does the actual bytes→markdown conversion via `markitdown`, and `document_path_to_markdown` is a thin path-based wrapper that validates/reads a file (PDF or DOCX) and delegates to it. Prefer extending the binary function for new format logic so both entry points benefit.
 
 ## Defining MCP tools (conventions from README)
 
